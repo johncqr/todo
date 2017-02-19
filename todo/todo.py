@@ -11,6 +11,7 @@ Commands (case sensitve) and Usage:
     d       Delete entry
     D       Delete all entries
     ED      Export all entries to sqlite3 database file
+    EI      Import all entries from sqlite3 database file
     X       Close ToDo Manager
 '''
 
@@ -99,16 +100,32 @@ def prompt_export_db(tm):
         return
     db_file = input("Enter database filename: ")
     if os.path.isfile(db_file):
-        if confirmation_dialog("Confirm overwrite {}? (Y/n)".format(db_file)):
+        if confirmation_dialog("Confirm overwrite {}? (Y/n): ".format(db_file)):
             os.remove(db_file)
             tm.to_db(db_file)
+            print("Database overwritten.")
         else:
             cancel_notification()
     else:
-        if confirmation_dialog("Confirm creation of database {}? (Y/n)".format(db_file)):
+        if confirmation_dialog("Confirm creation of database {}? (Y/n): ".format(db_file)):
             tm.to_db(db_file)
+            print("Database created.")
         else:
             cancel_notification()
+
+def prompt_import_db(tm):
+    db_file = input("Enter database filename: ")
+    if os.path.isfile(db_file):
+        if confirmation_dialog("Confirm import {}? (Y/n): ".format(db_file)):
+            try:
+                tm.from_db(db_file)
+                print("Import succeeded.")
+            except:
+                Print("Import failed.")
+        else:
+            cancel_notification()
+    else:
+        print("Database does not exist. Import failed.")
 
 def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
@@ -121,6 +138,7 @@ OPTIONS = {'l' : list_all,
            'd' : prompt_delete,
            'D' : prompt_delete_all,
            'ED' : prompt_export_db,
+           'ID' : prompt_import_db,
            }
 
 def prompt(tm):
@@ -135,7 +153,6 @@ def prompt(tm):
             print()
         else:
             error_notification()
-
 
 def main():
     tm = TodoManager()

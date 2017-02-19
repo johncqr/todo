@@ -1,6 +1,4 @@
 from datetime import datetime
-import pytz
-
 
 class Todo:
     DATETIME_FORMAT = '%B %d, %Y %I:%M:%S %p'
