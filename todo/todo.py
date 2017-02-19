@@ -1,3 +1,5 @@
+import os
+
 from todomanager import TodoManager
 
 LONG_MENU = '''
@@ -8,6 +10,7 @@ Commands (case sensitve) and Usage:
     u       Uncheckmark / uncomplete ([ ]) entry
     d       Delete entry
     D       Delete all entries
+    ED      Export all entries to sqlite3 database file
     X       Close ToDo Manager
 '''
 
@@ -16,8 +19,20 @@ Commands (case sensitve) and Usage:
 def check_boundaries(i, b, e):
     return b <= i < e
 
+def cancel_notification():
+    print("Command cancelled.")
+
 def error_notification():
     print("Please enter valid input.\n")
+
+def confirmation_dialog(prompt):
+    while True:
+        confirm = input(prompt)
+        if confirm == 'Y':
+            return True
+        elif confirm == 'n':
+            return False
+        error_notification()
 
 def list_all(tm):
     if (tm.count() == 0):
@@ -70,14 +85,30 @@ def prompt_delete(tm):
             error_notification()
 
 def prompt_delete_all(tm):
-    while True:
-        confirm = input("Confirm? (Y/n): ")
-        if confirm == 'Y':
-            tm.delete_all()
-            break
-        elif confirm == 'n':
-            break
-        error_notification()
+    if (tm.count() == 0):
+        print("There are no entries to delete.")
+        return
+    if confirmation_dialog("Confirm? (Y/n): "):
+        tm.delete_all()
+    else:
+        cancel_notification()
+
+def prompt_export_db(tm):
+    if (tm.count() == 0):
+        print("There are no entries to export.")
+        return
+    db_file = input("Enter database filename: ")
+    if os.path.isfile(db_file):
+        if confirmation_dialog("Confirm overwrite {}? (Y/n)".format(db_file)):
+            os.remove(db_file)
+            tm.to_db(db_file)
+        else:
+            cancel_notification()
+    else:
+        if confirmation_dialog("Confirm creation of database {}? (Y/n)".format(db_file)):
+            tm.to_db(db_file)
+        else:
+            cancel_notification()
 
 def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
@@ -89,6 +120,7 @@ OPTIONS = {'l' : list_all,
            'u' : prompt_uncomplete,
            'd' : prompt_delete,
            'D' : prompt_delete_all,
+           'ED' : prompt_export_db,
            }
 
 def prompt(tm):

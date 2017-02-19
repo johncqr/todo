@@ -2,6 +2,8 @@ import sqlite3
 
 from todotypes import Todo
 
+TABLE_HEADERS = "Description TEXT, Completed VARCHAR(255), Created_On timestamp, Completed_On timestamp, Updated_On timestamp"
+
 class TodoManager:
     """Handles managing, importing, and exporting Todo objects."""
     def __init__(self):
@@ -40,3 +42,12 @@ class TodoManager:
 
     def count_completed(self):
         return self.__count_completed
+
+    def to_db(self, db_file):
+        conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
+        c = conn.cursor()
+        c.execute('CREATE TABLE todo ({})'.format(TABLE_HEADERS))
+        c.executemany('INSERT INTO todo VALUES (?,?,?,?,?)', (t.rowify() for t in self.__storage))
+        conn.commit()
+        conn.close()
+

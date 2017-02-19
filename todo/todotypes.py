@@ -29,7 +29,7 @@ class Todo:
             return 'N/A'
 
     def rowify(self):
-        return (self.__desc, self.__completed, self.__created_on, self.__completed_on, self.__updated_on)
+        return [self.__desc, "YES" if self.__completed else "NO", self.__created_on, self.__completed_on, self.__updated_on]
 
 
     # Edit todo
