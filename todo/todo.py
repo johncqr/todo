@@ -2,6 +2,7 @@ from todomanager import TodoManager
 
 LONG_MENU = '''
 Commands (case sensitve) and Usage:
+    l       List all entries
     n       Create new entry
     c       Checkmark / complete ([X]) entry
     u       Uncheckmark / uncomplete ([ ]) entry
@@ -17,6 +18,13 @@ def check_boundaries(i, b, e):
 
 def error_notification():
     print("Please enter valid input.\n")
+
+def list_all(tm):
+    if (tm.count() == 0):
+        print("There are no entries to display.")
+    else:
+        for i, entry in enumerate(tm.all(), 1):
+            print("{}: {}".format(i, entry))
 
 def prompt_new(tm):
     desc = input("Description of new entry: ")
@@ -71,12 +79,12 @@ def prompt_delete_all(tm):
             break
         error_notification()
 
-def list_all(tm):
+def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
-    for i, entry in enumerate(tm.all(), 1):
-        print("{}: {}".format(i, entry))
 
-OPTIONS = {'n' : prompt_new,
+
+OPTIONS = {'l' : list_all,
+           'n' : prompt_new,
            'c' : prompt_complete,
            'u' : prompt_uncomplete,
            'd' : prompt_delete,
@@ -85,7 +93,7 @@ OPTIONS = {'n' : prompt_new,
 
 def prompt(tm):
     while True:
-        list_all(tm)
+        summary(tm)
         print(LONG_MENU)
         command = input("Enter command: ")
         if command == 'X':
