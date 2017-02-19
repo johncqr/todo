@@ -4,7 +4,7 @@ from todotypes import Todo
 
 TABLE_HEADERS = "Description TEXT, Completed VARCHAR(255), Created_On timestamp, Completed_On timestamp, Updated_On timestamp"
 
-def todoify(row):
+def todoify_db(row):
     ''' Returns Todo object using sqlite3 row information '''
     return Todo(row[0], row[2], row[3], row[4])
 
@@ -54,7 +54,7 @@ class TodoManager:
         conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute('CREATE TABLE todo ({})'.format(TABLE_HEADERS))
-        c.executemany('INSERT INTO todo VALUES (?,?,?,?,?)', (t.rowify() for t in self.__storage))
+        c.executemany('INSERT INTO todo VALUES (?,?,?,?,?)', (t.rowify_db() for t in self.__storage))
         conn.commit()
         conn.close()
 
@@ -62,7 +62,7 @@ class TodoManager:
         conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         for row in c.execute('SELECT * FROM todo'):
-            t = todoify(row)
+            t = todoify_db(row)
             if t.is_complete():
                 self.__count_completed += 1
             self.__count += 1

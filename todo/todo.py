@@ -2,9 +2,15 @@ import os
 
 from todomanager import TodoManager
 
+INTRO = '''
+---------------------------
+| Todo Manager by johncqr |
+---------------------------
+'''
+
 LONG_MENU = '''
 Commands (case sensitve) and Usage:
-    l       List all entries
+    l       List all entries with detailed information
     n       Create new entry
     c       Checkmark / complete ([X]) entry
     u       Uncheckmark / uncomplete ([ ]) entry
@@ -12,7 +18,9 @@ Commands (case sensitve) and Usage:
     d       Delete entry
     D       Delete all entries
     ED      Export all entries to sqlite3 database file
-    EI      Import all entries from sqlite3 database file
+    ID      Import all entries from sqlite3 database file
+    ES      Export all entries to Google Spreadsheet
+    IS      Import all entries to Google Spreadsheet
     X       Close ToDo Manager
 '''
 
@@ -37,6 +45,13 @@ def confirmation_dialog(prompt):
         error_notification()
 
 def list_all(tm):
+    if (tm.count() == 0):
+        print("There are no entries to display.")
+    else:
+        for i, entry in enumerate(tm.all(), 1):
+            print("{}: {}".format(i, entry.quick_view()))
+
+def list_all_verbose(tm):
     if (tm.count() == 0):
         print("There are no entries to display.")
     else:
@@ -146,7 +161,8 @@ def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
     list_all(tm)
 
-OPTIONS = {'l' : list_all,
+OPTIONS = {
+           'l' : list_all_verbose,
            'n' : prompt_new,
            'c' : prompt_complete,
            'u' : prompt_uncomplete,
@@ -160,10 +176,11 @@ OPTIONS = {'l' : list_all,
 def prompt(tm):
     while True:
         summary(tm)
-        print(LONG_MENU)
-        command = input("Enter command: ")
+        command = input("\nEnter command ('h' for help): ")
         if command == 'X':
             break
+        elif command == 'h':
+            print(LONG_MENU)
         elif command in OPTIONS:
             OPTIONS[command](tm)
             print()
@@ -172,6 +189,7 @@ def prompt(tm):
 
 def main():
     tm = TodoManager()
+    print(INTRO)
     prompt(tm)
     
 if __name__ == "__main__":

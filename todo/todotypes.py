@@ -10,9 +10,11 @@ class Todo:
         self.__completed = completed_on != None
         self.__updated_on = updated_on if updated_on else created_on
 
+    ## Public ##
+
     # Query todo
-    def view_desc(self):
-        return self.__desc
+    def quick_view(self):
+        return '[{}] {}'.format('X' if self.__completed else ' ', self.__desc)
 
     def is_complete(self):
         return self.__completed
@@ -29,7 +31,7 @@ class Todo:
     def updated_on(self):
         return self.__updated_on.strftime(Todo.DATETIME_FORMAT)
 
-    def rowify(self):
+    def rowify_db(self):
         ''' Returns tuple containing Todo object information for insert into sqlite3 database '''
         return [self.__desc, "YES" if self.__completed else "NO", self.__created_on, self.__completed_on, self.__updated_on]
 
@@ -49,7 +51,7 @@ class Todo:
         self.__desc = new_desc
 
 
-    # Private
+    ## Private ##
 
     def __repr__(self):
         return '[{}] {} \n  Created on: {}\n  Completed on: {}\n  Last updated on: {}\n'.format(
