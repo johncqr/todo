@@ -49,6 +49,3 @@ class Todo:
             self.created_on(),
             self.completed_on(),
             )
-    
-
-

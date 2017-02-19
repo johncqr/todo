@@ -1,16 +1,27 @@
 import sqlite3
 
-import todotypes
+from todotypes import Todo
 
 class TodoManager:
-    """Handles interfacing with the sqlite3 database (creating, deleting, querying todo entries)"""
+    """Handles managing, importing, and exporting Todo objects."""
+    def __init__(self):
+        STORAGE = list()    # Todos are held in a list
+        N = 0   # Current number of Todos
 
-    def connect(db_path):
-        self.__conn = sqlite3.connect(db_path)
-        self.__c = self.__conn.cursor()
+    def create(description):
+        COUNT += 1
+        STORAGE.append(Todo(description))
 
-    def disconnect():
-        self.__conn.close()
+    def delete(i):
+        COUNT -= 1
+        return STORAGE.pop()
 
+    def delete_all():
+        STORAGE.clear()
 
+    def all():
+        return STORAGE
+
+    def count():
+        return N
 
