@@ -5,12 +5,12 @@ import pytz
 class Todo:
     DATETIME_FORMAT = '%B %d, %Y %I:%M:%S %p'
 
-    def __init__(self, description="", created_on=datetime.now(), completed_on=None):
+    def __init__(self, description="", created_on=datetime.now(), completed_on=None, updated_on=None):
         self.__desc = description
         self.__created_on = created_on
         self.__completed_on = completed_on
         self.__completed = completed_on != None
-        self.__updated_on = created_on
+        self.__updated_on = updated_on if updated_on else created_on
 
     # Query todo
     def view_desc(self):
@@ -27,6 +27,9 @@ class Todo:
             return self.__completed_on.strftime(Todo.DATETIME_FORMAT)
         else:
             return 'N/A'
+
+    def rowify(self):
+        return (self.__desc, self.__completed, self.__created_on, self.__completed_on, self.__updated_on)
 
 
     # Edit todo
