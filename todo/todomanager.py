@@ -5,23 +5,22 @@ from todotypes import Todo
 class TodoManager:
     """Handles managing, importing, and exporting Todo objects."""
     def __init__(self):
-        STORAGE = list()    # Todos are held in a list
-        N = 0   # Current number of Todos
+        self.STORAGE = list()    # Todos are held in a list
+        self.COUNT = 0   # Current number of Todos
 
-    def create(description):
-        COUNT += 1
-        STORAGE.append(Todo(description))
+    def create(self, description):
+        self.COUNT += 1
+        self.STORAGE.append(Todo(description))
 
-    def delete(i):
-        COUNT -= 1
-        return STORAGE.pop()
+    def delete(self, i):
+        self.COUNT -= 1
+        return self.STORAGE.pop()
 
-    def delete_all():
-        STORAGE.clear()
+    def delete_all(self):
+        self.STORAGE.clear()
 
-    def all():
-        return STORAGE
+    def all(self):
+        return self.STORAGE
 
-    def count():
-        return N
-
+    def count(self):
+        return self.COUNT
