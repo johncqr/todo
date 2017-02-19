@@ -81,7 +81,7 @@ def prompt_delete_all(tm):
 
 def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
-
+    list_all(tm)
 
 OPTIONS = {'l' : list_all,
            'n' : prompt_new,
