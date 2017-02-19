@@ -8,6 +8,7 @@ Commands (case sensitve) and Usage:
     n       Create new entry
     c       Checkmark / complete ([X]) entry
     u       Uncheckmark / uncomplete ([ ]) entry
+    e       Edit entry description
     d       Delete entry
     D       Delete all entries
     ED      Export all entries to sqlite3 database file
@@ -68,6 +69,20 @@ def prompt_uncomplete(tm):
         i -= 1
         if check_boundaries(i, 0, tm.count()):
             tm.uncomplete(i)
+            break
+        else:
+            error_notification()
+
+def prompt_edit(tm):
+    if (tm.count() == 0):
+        print("There are no entries to edit.")
+        return
+    while True:
+        i = int(input("Index to edit: "))
+        i -= 1
+        if check_boundaries(i, 0, tm.count()):
+            new_desc = input("New description: ")
+            tm.edit(i, new_desc)
             break
         else:
             error_notification()
@@ -135,6 +150,7 @@ OPTIONS = {'l' : list_all,
            'n' : prompt_new,
            'c' : prompt_complete,
            'u' : prompt_uncomplete,
+           'e' : prompt_edit,
            'd' : prompt_delete,
            'D' : prompt_delete_all,
            'ED' : prompt_export_db,

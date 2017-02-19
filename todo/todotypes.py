@@ -26,7 +26,11 @@ class Todo:
         else:
             return 'N/A'
 
+    def updated_on(self):
+        return self.__updated_on.strftime(Todo.DATETIME_FORMAT)
+
     def rowify(self):
+        ''' Returns tuple containing Todo object information for insert into sqlite3 database '''
         return [self.__desc, "YES" if self.__completed else "NO", self.__created_on, self.__completed_on, self.__updated_on]
 
 
@@ -48,9 +52,10 @@ class Todo:
     # Private
 
     def __repr__(self):
-        return '[{}] {} \n  Created on: {}\n  Completed on: {}'.format(
+        return '[{}] {} \n  Created on: {}\n  Completed on: {}\n  Last updated on: {}\n'.format(
             'X' if self.__completed else ' ',
             self.__desc,
             self.created_on(),
             self.completed_on(),
+            self.updated_on(),
             )

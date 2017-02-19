@@ -5,6 +5,7 @@ from todotypes import Todo
 TABLE_HEADERS = "Description TEXT, Completed VARCHAR(255), Created_On timestamp, Completed_On timestamp, Updated_On timestamp"
 
 def todoify(row):
+    ''' Returns Todo object using sqlite3 row information '''
     return Todo(row[0], row[2], row[3], row[4])
 
 class TodoManager:
@@ -23,6 +24,9 @@ class TodoManager:
         if self.__storage[i].is_complete():
             self.__count_completed -= 1
         return self.__storage.pop()
+
+    def edit(self, i, new_description):
+        self.__storage[i].edit_desc(new_description)
 
     def complete(self, i):
         self.__count_completed += 1
