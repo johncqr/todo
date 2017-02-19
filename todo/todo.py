@@ -3,12 +3,17 @@ from todomanager import TodoManager
 LONG_MENU = '''
 Commands (case sensitve) and Usage:
     n       Create new entry
+    c       Checkmark / complete ([X]) entry
     d       Delete entry
     D       Delete all entries
     X       Close ToDo Manager
 '''
 
 # Prompts
+
+def check_boundaries(i, b, e):
+    return b <= i < e
+
 def error_notification():
     print("Please enter valid input.\n")
 
@@ -16,15 +21,24 @@ def prompt_new(tm):
     desc = input("Description of new entry: ")
     tm.create(desc)
 
+def prompt_complete(tm):
+    if (tm.count() == 0):
+        print("There are no entries to complete.")
+        return
+    i = int(input("Index to complete: "))
+    i -= 1
+    if check_boundaries(i, 0, tm.count()):
+        tm.complete(i)
+
 def prompt_delete(tm):
     if (tm.count() == 0):
         print("There are no entries to delete.")
         return
-
     while True:
         i = int(input("Index to delete: "))
-        if (0 <= i-1 < tm.count()):
-            tm.delete(i-1)
+        i -= 1
+        if check_boundaries(i, 0, tm.count()):
+            tm.delete(i)
             break
         else:
             error_notification()
@@ -40,11 +54,12 @@ def prompt_delete_all(tm):
         error_notification()
 
 def list_all(tm):
-    print("# of entries: " + str(tm.count()))
+    print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
     for i, entry in enumerate(tm.all(), 1):
         print("{}: {}".format(i, entry))
 
 OPTIONS = {'n' : prompt_new,
+           'c' : prompt_complete,
            'd' : prompt_delete,
            'D' : prompt_delete_all,
            }
