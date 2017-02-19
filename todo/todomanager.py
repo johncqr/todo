@@ -23,6 +23,10 @@ class TodoManager:
         self.__count_completed += 1
         self.__storage[i].complete()
 
+    def uncomplete(self, i):
+        self.__count_completed -= 1
+        self.__storage[i].uncomplete()
+
     def delete_all(self):
         self.__count = 0
         self.__count_completed = 0

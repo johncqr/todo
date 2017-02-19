@@ -4,6 +4,7 @@ LONG_MENU = '''
 Commands (case sensitve) and Usage:
     n       Create new entry
     c       Checkmark / complete ([X]) entry
+    u       Uncheckmark / uncomplete ([ ]) entry
     d       Delete entry
     D       Delete all entries
     X       Close ToDo Manager
@@ -25,10 +26,27 @@ def prompt_complete(tm):
     if (tm.count() == 0):
         print("There are no entries to complete.")
         return
-    i = int(input("Index to complete: "))
-    i -= 1
-    if check_boundaries(i, 0, tm.count()):
-        tm.complete(i)
+    while True:
+        i = int(input("Index to complete: "))
+        i -= 1
+        if check_boundaries(i, 0, tm.count()):
+            tm.complete(i)
+            break
+        else:
+            error_notification()
+
+def prompt_uncomplete(tm):
+    if (tm.count() == 0):
+        print("There are no entries to uncomplete.")
+        return
+    while True:
+        i = int(input("Index to uncomplete: "))
+        i -= 1
+        if check_boundaries(i, 0, tm.count()):
+            tm.uncomplete(i)
+            break
+        else:
+            error_notification()
 
 def prompt_delete(tm):
     if (tm.count() == 0):
@@ -60,6 +78,7 @@ def list_all(tm):
 
 OPTIONS = {'n' : prompt_new,
            'c' : prompt_complete,
+           'u' : prompt_uncomplete,
            'd' : prompt_delete,
            'D' : prompt_delete_all,
            }
@@ -69,11 +88,9 @@ def prompt(tm):
         list_all(tm)
         print(LONG_MENU)
         command = input("Enter command: ")
-        
         if command == 'X':
             break
-
-        if command in OPTIONS:
+        elif command in OPTIONS:
             OPTIONS[command](tm)
             print()
         else:

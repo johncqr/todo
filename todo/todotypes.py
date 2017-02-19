@@ -35,6 +35,10 @@ class Todo:
             self.__completed_on = datetime.now()
             self.__completed = True
 
+    def uncomplete(self):
+        self.__completed_on = None
+        self.__completed = False
+
     def edit_desc(self, new_desc):
         self.__updated_on = datetime.now()
         self.__desc = new_desc
