@@ -1,8 +1,34 @@
+import argparse
+import os
 import sqlite3
+
+from apiclient import discovery
+from httplib2 import Http
+from oauth2client import file, client, tools
 
 from todotypes import Todo
 
+# Google Sheets API
+SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
+CLIENT_SECRET_FILE = 'client_secret.json'
+
+def get_creds():
+    home_dir = os.path.expanduser('~')
+    credential_dir = os.path.join(home_dir, '.credentials')
+    if not os.path.exists(credential_dir):
+        os.makedirs(credential_dir)
+    credential_path = os.path.join(credential_dir,
+                                   'todo-googlesheetsapi.json')
+    store = file.Storage(credential_path)
+    credentials = store.get()
+    if not credentials or credentials.invalid:
+        flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+        flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
+        credentials = tools.run_flow(flow, store, flags)
+    return credentials
+
 TABLE_HEADERS = "Description TEXT, Completed VARCHAR(255), Created_On timestamp, Completed_On timestamp, Updated_On timestamp"
+SS_FIELDS = ('Completed?', 'Description', 'Created on', 'Completed on', 'Updated on')
 
 def todoify_db(row):
     ''' Returns Todo object using sqlite3 row information '''
@@ -67,4 +93,96 @@ class TodoManager:
                 self.__count_completed += 1
             self.__count += 1
             self.__storage.append(t)
+
+    def to_ss_new(self, ss_title):
+        # Validate
+        CREDS = get_creds()
+        SHEETS = discovery.build('sheets', 'v4', http=CREDS.authorize(Http()))
+
+        # Create new sheet
+        data = {'properties': {'title': ss_title}}
+        res = SHEETS.spreadsheets().create(body=data).execute()
+        sheet_id = res['spreadsheetId']
+
+        # Add data
+        rows = [t.rowify_ss() for t in self.__storage]
+        rows.insert(0, SS_FIELDS)
+        data = {'values': rows}
+        SHEETS.spreadsheets().values().update(spreadsheetId=sheet_id,
+                                              range='A1', body=data,
+                                              valueInputOption='USER_ENTERED').execute()
+
+        # Formatting
+        requests = []
+        requests.append([{
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [
+                        {
+                            "startRowIndex": 0,
+                            "endRowIndex": self.__count+1,
+                            "startColumnIndex": 0,
+                            "endColumnIndex": 1,
+                            }
+                        ],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "TEXT_CONTAINS",
+                            "values": [
+                                {
+                                    "userEnteredValue": "YES"
+                                    }
+                                ]
+                            },
+                        "format": {
+                            "textFormat": {
+                                "bold": True
+                                },
+                            "backgroundColor": { "green": 1 }
+                            }
+                        }
+                    },
+                "index": 0
+                }
+            },
+            {
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [
+                        {
+                            "startRowIndex": 0,
+                            "endRowIndex": self.__count+1,
+                            "startColumnIndex": 0,
+                            "endColumnIndex": 1,
+                            }
+                        ],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "TEXT_CONTAINS",
+                            "values": [
+                                {
+                                    "userEnteredValue": "NO"
+                                    }
+                                ]
+                            },
+                        "format": {
+                            "textFormat": {
+                                "bold": True
+                                },
+                            "backgroundColor": { "red": 1 }
+                            }
+                        }
+                    },
+                "index": 0
+                }
+            }])
+        data = {"requests": requests}
+        SHEETS.spreadsheets().batchUpdate(spreadsheetId=sheet_id,
+                                              body=data).execute()
+
+    def from_ss(self, sheet_id):
+        return
+
+
+        
 

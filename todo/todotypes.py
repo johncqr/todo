@@ -33,8 +33,11 @@ class Todo:
 
     def rowify_db(self):
         ''' Returns tuple containing Todo object information for insert into sqlite3 database '''
-        return [self.__desc, "YES" if self.__completed else "NO", self.__created_on, self.__completed_on, self.__updated_on]
+        return (self.__desc, "YES" if self.__completed else "NO", self.__created_on, self.__completed_on, self.__updated_on)
 
+    def rowify_ss(self):
+        ''' Returns tuple containing Todo object information for insert into Google spreadsheet '''
+        return ("YES" if self.__completed else "NO", self.__desc, self.created_on(), self.completed_on(), self.updated_on())
 
     # Edit todo
     def complete(self):

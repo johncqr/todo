@@ -157,6 +157,11 @@ def prompt_import_db(tm):
     else:
         print("Database does not exist. Import failed.")
 
+def prompt_export_ss(tm):
+    ss_title = input("Enter title of spreadsheet: ")
+    tm.to_ss_new(ss_title)
+    print("Export successful.")
+
 def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
     list_all(tm)
@@ -171,6 +176,7 @@ OPTIONS = {
            'D' : prompt_delete_all,
            'ED' : prompt_export_db,
            'ID' : prompt_import_db,
+           'ES' : prompt_export_ss,
            }
 
 def prompt(tm):
@@ -178,6 +184,7 @@ def prompt(tm):
         summary(tm)
         command = input("\nEnter command ('h' for help): ")
         if command == 'X':
+            print('Goodbye.')
             break
         elif command == 'h':
             print(LONG_MENU)
