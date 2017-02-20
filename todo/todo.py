@@ -25,7 +25,7 @@ Commands (case sensitve) and Usage:
     OS      Open known Google Spreadsheet in browser
     X       Close ToDo Manager
 '''
-SAVED_SHEETS_FILE = 'todo_sheets.txt'
+SAVED_SHEETS_FILE = 'todo_sheets.txt'   # Where the spreadsheetIds for created sheets are stored
 
 # Prompts
 
@@ -39,6 +39,7 @@ def error_notification():
     print("Please enter valid input.\n")
 
 def confirmation_dialog(prompt):
+    '''Returns a boolean based on user input (Y/n).'''
     while True:
         confirm = input(prompt)
         if confirm == 'Y':
@@ -48,6 +49,7 @@ def confirmation_dialog(prompt):
         error_notification()
 
 def list_all(tm):
+    '''Lists entries in tm storage through the Todo quick_view method.'''
     if (tm.count() == 0):
         print("There are no entries to display.")
     else:
@@ -55,6 +57,7 @@ def list_all(tm):
             print("{}: {}".format(i, entry.quick_view()))
 
 def list_all_verbose(tm):
+    '''Lists entries in tm storage along with extra information (dates).'''
     if (tm.count() == 0):
         print("There are no entries to display.")
     else:
@@ -62,10 +65,12 @@ def list_all_verbose(tm):
             print("{}: {}".format(i, entry))
 
 def prompt_new(tm):
+    '''Prompt to create new Todo.'''
     desc = input("Description of new entry: ")
     tm.create(desc)
 
 def prompt_complete(tm):
+    '''Prompt to checkmark existing Todo.'''
     if (tm.count() == 0):
         print("There are no entries to complete.")
         return
@@ -79,6 +84,7 @@ def prompt_complete(tm):
             error_notification()
 
 def prompt_uncomplete(tm):
+    '''Prompt to uncheckmark existing Todo.'''
     if (tm.count() == 0):
         print("There are no entries to uncomplete.")
         return
@@ -92,6 +98,7 @@ def prompt_uncomplete(tm):
             error_notification()
 
 def prompt_edit(tm):
+    '''Prompt to edit existing Todo.'''
     if (tm.count() == 0):
         print("There are no entries to edit.")
         return
@@ -106,6 +113,7 @@ def prompt_edit(tm):
             error_notification()
 
 def prompt_delete(tm):
+    '''Prompt to delete existing Todo.'''
     if (tm.count() == 0):
         print("There are no entries to delete.")
         return
@@ -119,6 +127,7 @@ def prompt_delete(tm):
             error_notification()
 
 def prompt_delete_all(tm):
+    '''Prompt to delete all existing Todos.'''
     if (tm.count() == 0):
         print("There are no entries to delete.")
         return
@@ -128,6 +137,7 @@ def prompt_delete_all(tm):
         cancel_notification()
 
 def prompt_export_db(tm):
+    '''Prompt to export existing Todos to sqlite3 database.'''
     if (tm.count() == 0):
         print("There are no entries to export.")
         return
@@ -147,6 +157,7 @@ def prompt_export_db(tm):
             cancel_notification()
 
 def prompt_import_db(tm):
+    '''Prompt to import Todos stored in sqlite3 database.'''
     db_file = input("Enter database filename: ")
     if os.path.isfile(db_file):
         if confirmation_dialog("Confirm import {}? (Y/n): ".format(db_file)):
@@ -161,6 +172,7 @@ def prompt_import_db(tm):
         print("Database does not exist. Import failed.")
 
 def prompt_open_ss(tm):
+    '''Prompt to open a Google Spreadsheet stored inside SAVED_SHEETS_FILE.'''
     if not os.path.isfile(SAVED_SHEETS_FILE):
         print(SAVED_SHEETS_FILE + " does not exist. No known sheets to open.")
         return
@@ -182,6 +194,7 @@ def prompt_open_ss(tm):
 
 
 def prompt_export_ss(tm):
+    '''Prompt to export existing Todos to Google Spreadsheets.'''
     ss_title = input("Enter title of spreadsheet: ")
     if confirmation_dialog("Confirm export {}? (Y/n): ".format(ss_title)):
         try:
@@ -195,6 +208,7 @@ def prompt_export_ss(tm):
 
 
 def prompt_import_ss(tm):
+    '''Prompt to import Todos stored in a known Google Spreadsheet.'''
     if not os.path.isfile(SAVED_SHEETS_FILE):
         print(SAVED_SHEETS_FILE + " does not exist. No known sheets to import.")
         return
@@ -240,6 +254,7 @@ OPTIONS = {
            }
 
 def prompt(tm):
+    '''Loops to prompt user for commands.'''
     while True:
         list_all(tm)
         command = input("\nEnter command ('h' for help): ")

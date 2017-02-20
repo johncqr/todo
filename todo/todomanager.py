@@ -9,11 +9,12 @@ from oauth2client import file, client, tools
 from todotypes import Todo
 
 # Google Sheets API Globals
-SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
+SCOPES = "https://www.googleapis.com/auth/spreadsheets"
 CLIENT_SECRET_FILE = 'client_secret.json'
-URL = 'https://docs.google.com/spreadsheets/d/'
+URL = "https://docs.google.com/spreadsheets/d/"
 
 def get_creds():
+    '''Obtains credentials to be used for Google Sheets API.'''
     home_dir = os.path.expanduser('~')
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
@@ -32,22 +33,22 @@ TABLE_HEADERS = "Description TEXT, Completed VARCHAR(255), Created_On timestamp,
 SS_FIELDS = ('Completed?', 'Description', 'Created on', 'Completed on', 'Updated on')
 
 def todoify_db(row):
-    ''' Returns Todo object using sqlite3 row information '''
+    '''Returns Todo object using sqlite3 row information.'''
     return Todo(row[0], row[2], row[3], row[4])
 
 def todoify_ss(row):
-    ''' Returns Todo object using Google Sheet row information '''
+    '''Returns Todo object using Google Sheet row information.'''
     return Todo(row[1], row[2], row[3], row[4])
 
 def get_url(sheet_id):
     return URL+sheet_id
 
 class TodoManager:
-    """Handles managing, importing, and exporting Todo objects."""
+    '''Handles managing, importing, and exporting Todo objects.'''
     def __init__(self):
         self.__storage = list()    # Todos are held in a list
         self.__count = 0   # Current number of Todos
-        self.__count_completed = 0
+        self.__count_completed = 0  # Current number of completed Todos
 
     def create(self, description):
         self.__count += 1
@@ -85,6 +86,7 @@ class TodoManager:
         return self.__count_completed
 
     def to_db(self, db_file):
+        '''Exports storage to a sqlite3 db.'''
         conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         c.execute('CREATE TABLE todo ({})'.format(TABLE_HEADERS))
@@ -93,6 +95,7 @@ class TodoManager:
         conn.close()
 
     def from_db(self, db_file):
+        '''Imports sqlite3 db to storage.'''
         conn = sqlite3.connect(db_file, detect_types=sqlite3.PARSE_DECLTYPES)
         c = conn.cursor()
         for row in c.execute('SELECT * FROM todo'):
@@ -103,6 +106,7 @@ class TodoManager:
             self.__storage.append(t)
 
     def to_ss_new(self, ss_title):
+        '''Exports storage to a new Google Spreadsheet.'''
         # Validate
         creds = get_creds()
         service = discovery.build('sheets', 'v4', http=creds.authorize(Http()))
@@ -126,7 +130,9 @@ class TodoManager:
                                               valueInputOption='USER_ENTERED').execute()
 
         # Formatting
-        requests = []
+        requests = []   # contains requests for API batchUpdate
+
+        # Turn the background colors of "YES" cells to green and "NO" cells to red
         requests.append([{
             "addConditionalFormatRule": {
                 "rule": {
@@ -190,10 +196,11 @@ class TodoManager:
                 }
             }])
         data = {"requests": requests}
+
+        # send API request
         service.spreadsheets().batchUpdate(spreadsheetId=sheet_id,
                                               body=data).execute()
         return get_url(sheet_id)
-
 
     def from_ss(self, sheet_id):
         # Validate
@@ -204,10 +211,11 @@ class TodoManager:
         range_name = 'A2:E'
         result = service.spreadsheets().values().get(
             spreadsheetId=sheet_id, range=range_name).execute()
+
+        # Store obtained rows in storage
         for row in result['values']:
             t = todoify_ss(row)
             if t.is_complete():
                 self.__count_completed += 1
             self.__count += 1
             self.__storage.append(t)
-
