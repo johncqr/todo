@@ -1,7 +1,7 @@
 import os
 import webbrowser
 
-from todomanager import TodoManager
+from todomanager import TodoManager, get_url
 
 INTRO = '''
 ---------------------------
@@ -21,9 +21,11 @@ Commands (case sensitve) and Usage:
     ED      Export all entries to sqlite3 database file
     ID      Import all entries from sqlite3 database file
     ES      Export all entries to Google Spreadsheet
-    IS      Import all entries to Google Spreadsheet
+    IS      Import all entries from Google Spreadsheet
+    OS      Open known Google Spreadsheet in browser
     X       Close ToDo Manager
 '''
+SAVED_SHEETS_FILE = 'todo_sheets.txt'
 
 # Prompts
 
@@ -158,6 +160,27 @@ def prompt_import_db(tm):
     else:
         print("Database does not exist. Import failed.")
 
+def prompt_open_ss(tm):
+    if not os.path.isfile(SAVED_SHEETS_FILE):
+        print(SAVED_SHEETS_FILE + " does not exist. No known sheets to open.")
+        return
+
+    infile = open(SAVED_SHEETS_FILE, 'r')
+    sheets = [e.split('|||') for e in infile.readlines()]
+    infile.close()
+    print("Known sheets (INDEX:  TITLE -> ID):")
+    for i,entry in enumerate(sheets):
+        print('{}:  {} -> {}'.format(i+1, entry[1].strip(), entry[0]))
+    while True:
+        i = int(input("Index to open: "))
+        i -= 1
+        if check_boundaries(i, 0, len(sheets)):
+            break
+        else:
+            error_notification()
+    webbrowser.open(get_url(sheets[i][0]))
+
+
 def prompt_export_ss(tm):
     ss_title = input("Enter title of spreadsheet: ")
     print("Exporting...")
@@ -166,10 +189,31 @@ def prompt_export_ss(tm):
     if confirmation_dialog("Open default browser to exported sheet? (Y/n): "):
         webbrowser.open(url)
 
+def prompt_import_ss(tm):
+    if not os.path.isfile(SAVED_SHEETS_FILE):
+        print(SAVED_SHEETS_FILE + " does not exist. No known sheets to import.")
+        return
 
+    infile = open(SAVED_SHEETS_FILE, 'r')
+    sheets = [e.split('|||') for e in infile.readlines()]
+    infile.close()
+    print("Known sheets (INDEX:  TITLE -> ID):")
+    for i,entry in enumerate(sheets):
+        print('{}:  {} -> {}'.format(i+1, entry[1].strip(), entry[0]))
+    while True:
+        i = int(input("Index to import: "))
+        i -= 1
+        if check_boundaries(i, 0, len(sheets)):
+            break
+        else:
+            error_notification()
+    print("Importing...")
+    tm.from_ss(sheets[i][0])
+    print("Import successful.")
+   
 def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))
-    list_all(tm)
+    
 
 OPTIONS = {
            'l' : list_all_verbose,
@@ -182,17 +226,20 @@ OPTIONS = {
            'ED' : prompt_export_db,
            'ID' : prompt_import_db,
            'ES' : prompt_export_ss,
+           'IS' : prompt_import_ss,
+           'OS' : prompt_open_ss,
            }
 
 def prompt(tm):
     while True:
-        summary(tm)
+        list_all(tm)
         command = input("\nEnter command ('h' for help): ")
         if command == 'X':
             print('Goodbye.')
             break
         elif command == 'h':
             print(LONG_MENU)
+            summary(tm)
         elif command in OPTIONS:
             OPTIONS[command](tm)
             print()

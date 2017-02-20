@@ -5,10 +5,20 @@ class Todo:
 
     def __init__(self, description="", created_on=datetime.now(), completed_on=None, updated_on=None):
         self.__desc = description
+        if type(created_on) == str:
+            created_on = datetime.strptime(created_on, Todo.DATETIME_FORMAT)
         self.__created_on = created_on
+
+        if completed_on == 'N/A':
+            completed_on = None
+        elif type(completed_on) == str:
+            completed_on = datetime.strptime(completed_on, Todo.DATETIME_FORMAT)
         self.__completed_on = completed_on
         self.__completed = completed_on != None
-        self.__updated_on = updated_on if updated_on else created_on
+
+        if type(updated_on) == str:
+            updated_on = datetime.strptime(updated_on, Todo.DATETIME_FORMAT)
+        self.__updated_on = updated_on if updated_on else self.__created_on
 
     ## Public ##
 

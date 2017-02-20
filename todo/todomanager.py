@@ -8,7 +8,7 @@ from oauth2client import file, client, tools
 
 from todotypes import Todo
 
-# Google Sheets API
+# Google Sheets API Globals
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 CLIENT_SECRET_FILE = 'client_secret.json'
 URL = 'https://docs.google.com/spreadsheets/d/'
@@ -34,6 +34,13 @@ SS_FIELDS = ('Completed?', 'Description', 'Created on', 'Completed on', 'Updated
 def todoify_db(row):
     ''' Returns Todo object using sqlite3 row information '''
     return Todo(row[0], row[2], row[3], row[4])
+
+def todoify_ss(row):
+    ''' Returns Todo object using Google Sheet row information '''
+    return Todo(row[1], row[2], row[3], row[4])
+
+def get_url(sheet_id):
+    return URL+sheet_id
 
 class TodoManager:
     """Handles managing, importing, and exporting Todo objects."""
@@ -107,7 +114,7 @@ class TodoManager:
 
         # Save id
         outfile = open('todo_sheets.txt', 'a')
-        outfile.write('{} {}\n'.format(sheet_id, ss_title))
+        outfile.write('{}|||{}\n'.format(sheet_id, ss_title))
         outfile.close()
 
         # Add data
@@ -185,12 +192,22 @@ class TodoManager:
         data = {"requests": requests}
         service.spreadsheets().batchUpdate(spreadsheetId=sheet_id,
                                               body=data).execute()
-        return URL+sheet_id
+        return get_url(sheet_id)
 
 
     def from_ss(self, sheet_id):
-        return
+        # Validate
+        creds = get_creds()
+        service = discovery.build('sheets', 'v4', http=creds.authorize(Http()))
 
-
-        
+        # Get sheet
+        range_name = 'A2:E'
+        result = service.spreadsheets().values().get(
+            spreadsheetId=sheet_id, range=range_name).execute()
+        for row in result['values']:
+            t = todoify_ss(row)
+            if t.is_complete():
+                self.__count_completed += 1
+            self.__count += 1
+            self.__storage.append(t)
 
