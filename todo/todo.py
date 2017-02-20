@@ -183,11 +183,16 @@ def prompt_open_ss(tm):
 
 def prompt_export_ss(tm):
     ss_title = input("Enter title of spreadsheet: ")
-    print("Exporting...")
-    url = tm.to_ss_new(ss_title)
-    print("Export successful.")
-    if confirmation_dialog("Open default browser to exported sheet? (Y/n): "):
-        webbrowser.open(url)
+    if confirmation_dialog("Confirm export {}? (Y/n): ".format(ss_title)):
+        try:
+            print("Exporting...")
+            url = tm.to_ss_new(ss_title)
+            print("Export successful.")
+            if confirmation_dialog("Open default browser to exported sheet? (Y/n): "):
+                webbrowser.open(url)
+        except:
+           Print("Export failed.")
+
 
 def prompt_import_ss(tm):
     if not os.path.isfile(SAVED_SHEETS_FILE):
@@ -207,8 +212,12 @@ def prompt_import_ss(tm):
             break
         else:
             error_notification()
-    print("Importing...")
-    tm.from_ss(sheets[i][0])
+    if confirmation_dialog("Confirm import {}? (Y/n): ".format(entry[1].strip())):
+        try:
+            print("Importing...")
+            tm.from_ss(sheets[i][0])
+        except:
+           Print("Import failed.")
     print("Import successful.")
    
 def summary(tm):
