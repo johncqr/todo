@@ -1,4 +1,5 @@
 import os
+import webbrowser
 
 from todomanager import TodoManager
 
@@ -159,8 +160,12 @@ def prompt_import_db(tm):
 
 def prompt_export_ss(tm):
     ss_title = input("Enter title of spreadsheet: ")
-    tm.to_ss_new(ss_title)
+    print("Exporting...")
+    url = tm.to_ss_new(ss_title)
     print("Export successful.")
+    if confirmation_dialog("Open default browser to exported sheet? (Y/n): "):
+        webbrowser.open(url)
+
 
 def summary(tm):
     print("# of entries: {}\n# of completed entries: {}".format(tm.count(), tm.count_completed()))

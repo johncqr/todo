@@ -11,6 +11,7 @@ from todotypes import Todo
 # Google Sheets API
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 CLIENT_SECRET_FILE = 'client_secret.json'
+URL = 'https://docs.google.com/spreadsheets/d/'
 
 def get_creds():
     home_dir = os.path.expanduser('~')
@@ -96,19 +97,24 @@ class TodoManager:
 
     def to_ss_new(self, ss_title):
         # Validate
-        CREDS = get_creds()
-        SHEETS = discovery.build('sheets', 'v4', http=CREDS.authorize(Http()))
+        creds = get_creds()
+        service = discovery.build('sheets', 'v4', http=creds.authorize(Http()))
 
         # Create new sheet
         data = {'properties': {'title': ss_title}}
-        res = SHEETS.spreadsheets().create(body=data).execute()
+        res = service.spreadsheets().create(body=data).execute()
         sheet_id = res['spreadsheetId']
+
+        # Save id
+        outfile = open('todo_sheets.txt', 'a')
+        outfile.write('{} {}\n'.format(sheet_id, ss_title))
+        outfile.close()
 
         # Add data
         rows = [t.rowify_ss() for t in self.__storage]
         rows.insert(0, SS_FIELDS)
         data = {'values': rows}
-        SHEETS.spreadsheets().values().update(spreadsheetId=sheet_id,
+        service.spreadsheets().values().update(spreadsheetId=sheet_id,
                                               range='A1', body=data,
                                               valueInputOption='USER_ENTERED').execute()
 
@@ -177,8 +183,10 @@ class TodoManager:
                 }
             }])
         data = {"requests": requests}
-        SHEETS.spreadsheets().batchUpdate(spreadsheetId=sheet_id,
+        service.spreadsheets().batchUpdate(spreadsheetId=sheet_id,
                                               body=data).execute()
+        return URL+sheet_id
+
 
     def from_ss(self, sheet_id):
         return
